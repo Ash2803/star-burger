@@ -3,7 +3,7 @@ from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
 
-from .models import Product
+from .models import Product, OrderProduct, Order
 from .models import ProductCategory
 from .models import Restaurant
 from .models import RestaurantMenuItem
@@ -29,6 +29,16 @@ class RestaurantAdmin(admin.ModelAdmin):
     inlines = [
         RestaurantMenuItemInline
     ]
+
+
+class OrderProductInline(admin.TabularInline):
+    model = OrderProduct
+    extra = 1
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    inlines = (OrderProductInline,)
 
 
 @admin.register(Product)
@@ -91,13 +101,16 @@ class ProductAdmin(admin.ModelAdmin):
         if not obj.image:
             return 'выберите картинку'
         return format_html('<img src="{url}" style="max-height: 200px;"/>', url=obj.image.url)
+
     get_image_preview.short_description = 'превью'
 
     def get_image_list_preview(self, obj):
         if not obj.image or not obj.id:
             return 'нет картинки'
         edit_url = reverse('admin:foodcartapp_product_change', args=(obj.id,))
-        return format_html('<a href="{edit_url}"><img src="{src}" style="max-height: 50px;"/></a>', edit_url=edit_url, src=obj.image.url)
+        return format_html('<a href="{edit_url}"><img src="{src}" style="max-height: 50px;"/></a>', edit_url=edit_url,
+                           src=obj.image.url)
+
     get_image_list_preview.short_description = 'превью'
 
 
